@@ -1,0 +1,34 @@
+<!-- base.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Zesty Zomato</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+  </head>
+  <body>
+    <div id="content">
+      {% block content %}{% endblock %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/socket.io.js') }}"></script>
+    <script>
+      // Connect to the WebSocket server
+      var socket = io();
+
+      // Handle WebSocket event for order status update
+      socket.on('order_status_update', function (data) {
+        var orderElement = document.getElementById('order-' + data.order_id);
+        if (orderElement) {
+          orderElement.textContent = data.status;
+        }
+      });
+
+      // Handle WebSocket event for chatbot response
+      socket.on('chatbot_response', function (data) {
+        var chatbotResponseElement = document.getElementById('chatbot-response');
+        chatbotResponseElement.textContent = data.response;
+      });
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

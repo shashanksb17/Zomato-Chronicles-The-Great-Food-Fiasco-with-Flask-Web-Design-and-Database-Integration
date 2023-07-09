@@ -1,0 +1,73 @@
+<!-- order.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Place Order</h1>
+  <form id="orderForm">
+    <label for="customer_name">Customer Name:</label>
+    <input type="text" name="customer_name" required>
+    <label for="dish_id">Dish ID:</label>
+    <input type="text" name="dish_id" value="{{ dish_id }}" readonly>
+    <button type="submit">Place Order</button>
+    <p id="orderError" class="error"></p>
+  </form>
+
+  <h2>Order Status</h2>
+  <p id="order-{{ order_id }}">{{ initial_status }}</p>
+
+  <h2>Chatbot</h2>
+  <div id="chatbotContainer">
+    <div id="chatlog"></div>
+    <div id="chatInputContainer">
+      <input type="text" id="userInput" placeholder="Ask a question" autocomplete="off">
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script>
+    var chatlog = document.getElementById('chatlog');
+    var userInput = document.getElementById('userInput');
+    var sendBtn = document.getElementById('sendBtn');
+
+    // Connect to the WebSocket server
+    var socket = io();
+
+    // Handle WebSocket event for chatbot response
+    socket.on('chatbot_response', function (data) {
+      appendMessage(data.response, 'chatbot');
+    });
+
+    // Handle user input submission
+    userInput.addEventListener('keydown', function (event) {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        sendUserInput();
+      }
+    });
+
+    sendBtn.addEventListener('click', function (event) {
+      event.preventDefault();
+      sendUserInput();
+    });
+
+    function sendUserInput() {
+      var input = userInput.value.trim();
+      if (input !== '') {
+        appendMessage(input, 'user');
+        userInput.value = '';
+        socket.emit('chatbot_request', { user_input: input });
+      }
+    }
+
+    function appendMessage(message, sender) {
+      var messageElement = document.createElement('div');
+      messageElement.classList.add('message', sender);
+      messageElement.textContent = message;
+      chatlog.appendChild(messageElement);
+      chatlog.scrollTop = chatlog.scrollHeight;
+    }
+  </script>
+{% endblock %}

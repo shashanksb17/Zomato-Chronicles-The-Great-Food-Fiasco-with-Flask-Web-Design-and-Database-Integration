@@ -1,0 +1,37 @@
+<!-- index.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Welcome to Zesty Zomato!</h1>
+  <h2>Chat with ZomatoBot</h2>
+  <div id="chat-container">
+    <div id="chat-messages"></div>
+    <div id="chat-input">
+      <input type="text" id="user-input" placeholder="Type your message...">
+      <button id="send-button">Send</button>
+    </div>
+  </div>
+
+  <div id="chatbot-response"></div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script>
+    // Send user input to the server and receive chatbot response
+    document.getElementById('send-button').addEventListener('click', function () {
+      var userInput = document.getElementById('user-input').value.trim();
+
+      if (userInput !== '') {
+        var chatMessagesElement = document.getElementById('chat-messages');
+        chatMessagesElement.innerHTML += '<div class="user-message">' + userInput + '</div>';
+
+        // Send user input to the server via WebSocket
+        socket.emit('user_input', { input: userInput });
+
+        // Clear the input field
+        document.getElementById('user-input').value = '';
+      }
+    });
+  </script>
+{% endblock %}
